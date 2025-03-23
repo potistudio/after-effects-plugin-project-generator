@@ -1,5 +1,5 @@
 import cli from "./cli";
 
-(function() {
-	cli();
+(async function() {
+	await cli();
 })();

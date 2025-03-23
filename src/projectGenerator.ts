@@ -5,6 +5,8 @@ import SolutionGenerator from "./solutionGenerator";
 import VCXGenerator from "./vcxGenerator";
 import VCXFiltersGenerator from "./vcxFiltersGenerator";
 import VCXUserGenerator from "./vcxUserGenerator";
+import SourceGenerator from "./sourceGenerator";
+import path from "node:path";
 
 class ProjectGenerator {
 	//* Project Info
@@ -26,12 +28,12 @@ class ProjectGenerator {
 		this.makeWinProject();
 		this.makeVSCode();
 		this.copySDK();
+		this.makeSource();
 	}
 
 
 	private async makeProjectStructure(): Promise<void> {
 		await fsPromises.mkdir (this._destination);
-		await fsPromises.mkdir (`${this._destination}/src/`);
 	}
 
 	private async makeResourceInclude(): Promise<void> {
@@ -51,7 +53,7 @@ class ProjectGenerator {
 			+ "#endif"                                          + "\n"
 			+ "#endif"                                          + "\n";
 
-		await fsPromises.mkdir (`${this._destination}/pipl`);
+		await fsPromises.mkdir (path.resolve(`${this._destination}/pipl`));
 
 		await fsPromises.writeFile (`${this._destination}/pipl/resource.h`, content);
 		await fsPromises.writeFile (`${this._destination}/pipl/${this._projectName}.r`, new ResourceGenerator (this._pluginName).generate());
@@ -106,6 +108,15 @@ class ProjectGenerator {
 			`${this._destination}/include/aesdk/utils/`,
 			{ recursive: true }
 		);
+	}
+
+	private async makeSource() {
+		const generator = new SourceGenerator();
+		generator.name = `${this._projectName}`;
+
+		await fsPromises.mkdir (path.resolve(`${this._destination}/src/`));
+
+		await fsPromises.writeFile (path.resolve(`${this._destination}/src/${this._projectName}.cc`), generator.generate());
 	}
 }
 
